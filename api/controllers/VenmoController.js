@@ -35,10 +35,10 @@ module.exports = {
       token = req.body.token;
     var venmoUsers = ref.child("venmoUsers");
     this.getAuthToken(req.body.data.data.authorizationCode).then(function (response) {
-      var user = {};
-      user[req.body.data.userId] = response;
-      venmoUsers.set(user);
-      sails.log(user);
+        var user = {};
+        user[req.body.data.userId] = response;
+        venmoUsers.set(user);
+      sails.log("NO LONG LOGGING USER");
       return res.json({
         user: response
       });
