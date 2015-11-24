@@ -45,5 +45,6 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
-  'POST /venmo/link': 'VenmoController.link'
+  'POST /venmo/link': 'VenmoController.link',
+  'POST /venmo/pay': 'VenmoController.pay'
 };

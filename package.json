@@ -35,5 +35,8 @@
     "url": "git://github.com/brian/sauce.git"
   },
   "author": "brian",
-  "license": ""
+  "license": "",
+  "devDependencies": {
+    "sails-hook-babel": "^5.0.1"
+  }
 }
