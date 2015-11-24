@@ -13,7 +13,8 @@ module.exports.venmo = {
         }
     },
     meEndpoint: 'https://api.venmo.com/v1/me',
-    paymentEndpoint: 'https://sandbox-api.venmo.com/v1/payments',
+    paymentEndpointDev: 'https://sandbox-api.venmo.com/v1/payments',
+    paymentEndpoint: 'https://api.venmo.com/v1/payments',
     scope: 'access_email, access_phone, access_profile, make_payments',
     endpoint: 'https://api.venmo.com/v1/oauth/access_token',
     redirectUri: 'http://localhost:4200/login',

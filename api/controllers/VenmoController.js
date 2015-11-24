@@ -4,8 +4,9 @@
 * @description :: Server-side logic for managing venmopayments
 * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
 */
-const Firebase = require("firebase");
-const request = require('request');
+const Firebase = require("firebase"),
+    request = require('request'),
+    USE_DEV_PAYMENTS = false;
 
 module.exports = {
 
@@ -16,8 +17,8 @@ module.exports = {
         let ref = new Firebase(sails.config.firebase.url),
             authCode = req.body.data.data.authorizationCode,
             userId = req.body.data.userId,
-            venmoUsers = ref.child("venmoUsers/" + userId),
-            userRef = ref.child("users/" + userId + "/hasVenmo");
+            venmoUsers = ref.child(`venmoUsers/${userId}`),
+            userRef = ref.child(`users/${userId}/hasVenmo`);
         VenmoService.getAuthToken(authCode)
             .then(function (response) {
                 let user = {};
@@ -42,7 +43,7 @@ module.exports = {
             payments;
         return this.setCurrentUser(req.body.user)
             .then( (user) => {
-                return self.getPayments(req, res, true);
+                return self.getPayments(req, res, USE_DEV_PAYMENTS);
             })
             .then( (data) => {
                 payments = data;
@@ -78,7 +79,7 @@ module.exports = {
     getPayments: function (req, res, dev) {
         sails.log.info("payments", req.body.payment.invoices);
         let paymentsProm = this.aggregateInvoices(req.body.payment.invoices, req.body),
-            venmoRef = new Firebase(sails.config.firebase.url + 'venmoUsers'),
+            venmoRef = new Firebase(`${sails.config.firebase.url}venmoUsers`),
             self = this,
             payments;
         return paymentsProm.then(function (data) {
@@ -95,7 +96,7 @@ module.exports = {
                                 obj.id = p.user;
                                 resolve(obj);
                             } else {
-                                new Firebase(sails.config.firebase.url + 'users')
+                                new Firebase(`${sails.config.firebase.url}users`)
                                     .orderByKey()
                                     .equalTo(p.user)
                                     .once('value', function (snapshot) {
@@ -121,7 +122,7 @@ module.exports = {
                       access_token: self.currentUser.access_token,
                       user_id: users[i].user ? users[i].user.id : users[i].email,
                       amount: p.amount,
-                      note: p.note
+                      note: p.note || "Payment made through Settld"
                     }
                 }
                 return {
