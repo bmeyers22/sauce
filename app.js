@@ -14,7 +14,7 @@ app.listen(config.port, function () {
 
 function bootstrapIndex(keyOverride) {
   var $redis = redis.createClient(),
-    key = keyOverride || $redis.get('web:current');
+    key = keyOverride || $redis.get('web:index');
   return $redis.get(key);
 }
 
