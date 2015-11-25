@@ -52,6 +52,8 @@ module.exports = function(app, config) {
     require(controller)(app);
   });
 
+  require(config.root + '/routes.js')(app);
+
   app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;

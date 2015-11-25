@@ -3,7 +3,8 @@ nodemon = require('gulp-nodemon'),
 plumber = require('gulp-plumber'),
 livereload = require('gulp-livereload'),
 babel = require('gulp-babel'),
-sass = require('gulp-ruby-sass');
+sass = require('gulp-ruby-sass'),
+sh = require('shelljs');
 
 var paths = {
     js: [
@@ -11,6 +12,11 @@ var paths = {
         'src/controllers/**/*.js'
     ]
 }
+
+gulp.task('clean-app', function() {
+    sh.rm('-r', 'app/controllers');
+    sh.rm('-r', 'app/services');
+});
 
 gulp.task('sass', function () {
     return sass('./public/css/**/*.scss')
@@ -57,6 +63,7 @@ gulp.task('develop', function () {
 });
 
 gulp.task('default', [
+    'clean-app',
     'controllers',
     'services',
     'sass',
@@ -64,6 +71,7 @@ gulp.task('default', [
     'watch'
 ]);
 gulp.task('build', [
+    'clean-app',
     'controllers',
     'services',
     'sass'
