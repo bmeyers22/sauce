@@ -50,7 +50,7 @@ var config = {
         app: {
             name: 'sauce'
         },
-        port: process.env.PORT || 3000,
+        port: process.env.PORT || 8080,
         venmo: {
             sandboxParams: {
                 userId: '145434160922624933',
