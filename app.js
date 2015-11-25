@@ -1,7 +1,8 @@
 
 
 var express = require('express'),
-    config = require('./config/config');
+    config = require('./config/config'),
+    redis = require("redis");
 
 var app = express();
 
@@ -9,4 +10,15 @@ require('./config/express')(app, config);
 
 app.listen(config.port, function () {
     console.log('Express server listening on port ' + config.port);
+});
+
+function bootstrapIndex(keyOverride) {
+  let $redis = redis.createClient(),
+    key = keyOverride || $redis.get('web:current');
+  return $redis.get(key);
+}
+
+
+router.get('*', function (req, res, next) {
+    res.send(bootstrapIndex());
 });
