@@ -2,7 +2,8 @@
 
 var express = require('express'),
     config = require('./config/config'),
-    redis = require("redis");
+    redis = require("redis"),
+    router = express.Router();
 
 var app = express();
 
@@ -18,7 +19,8 @@ function bootstrapIndex(keyOverride) {
   return $redis.get(key);
 }
 
+app.use('/', router);
 
-app.get('*', function (req, res, next) {
+router.all('*', function (req, res) {
     res.send(bootstrapIndex());
 });
