@@ -51,7 +51,7 @@ var VenmoController = {
             return self.getPayments(req, res, USE_DEV_PAYMENTS);
         }).then(function (data) {
             payments = data;
-            console.log.info("ABOUT TO PAY", data);
+            console.info("ABOUT TO PAY", data);
             var proms = data.map(function (p) {
                 return self.sendPayment(p.venmoParams);
             });
@@ -79,13 +79,13 @@ var VenmoController = {
     },
 
     getPayments: function getPayments(req, res, dev) {
-        console.log.info("payments", req.body.payment.invoices);
+        console.info("payments", req.body.payment.invoices);
         var paymentsProm = this.aggregateInvoices(req.body.payment.invoices, req.body),
             venmoRef = new Firebase(config.firebase.url + 'venmoUsers'),
             self = this,
             payments = undefined;
         return paymentsProm.then(function (data) {
-            console.log.info("data", data);
+            console.info("data", data);
             payments = data;
             var proms = data.map(function (p) {
                 return new Promise(function (resolve, reject) {
@@ -106,10 +106,10 @@ var VenmoController = {
             });
             return Promise.all(proms);
         }).then(function (users) {
-            console.log.info("USERS", users);
+            console.info("USERS", users);
             var mapped = payments.map(function (p, i) {
                 var venmoParams = {};
-                console.log.info("DEV", dev);
+                console.info("DEV", dev);
                 if (dev) {
                     venmoParams = self.getDevPayment(self.currentUser);
                 } else {
@@ -125,19 +125,19 @@ var VenmoController = {
                     venmoParams: venmoParams
                 };
             });
-            console.log.info("mapped", mapped);
+            console.info("mapped", mapped);
             return mapped;
         });
     },
 
     getDevPayment: function getDevPayment(user, type) {
-        console.log.info("USER", user);
+        console.info("USER", user);
         var data = {
             access_token: user.access_token,
             note: config.venmo.sandboxParams.note,
             amount: config.venmo.sandboxParams.paymentAmount.settled
         };
-        console.log.info("DATA", data);
+        console.info("DATA", data);
         if (type === 'pending') {
             data.email = 'bureddog22@gmail.com';
             data.amount = config.venmo.sandboxParams.paymentAmount.settld;
@@ -153,11 +153,11 @@ var VenmoController = {
         return InvoicesService.getInvoicesFromIds(invoiceIds).then(function (invoices) {
             _this2.invoices = invoices;
             var invoiceGroups = _.groupBy(_this2.invoices, 'payee');
-            console.log.info('invoicegroups', invoiceGroups);
+            console.info('invoicegroups', invoiceGroups);
             var payments = [];
             _.forIn(invoiceGroups, function (val, key) {
-                console.log.info('val', val);
-                console.log.info('key', key);
+                console.info('val', val);
+                console.info('key', key);
                 var amount = 0;
                 val.forEach(function (inv) {
                     amount += inv.amount;
@@ -169,7 +169,7 @@ var VenmoController = {
                     note: params.note
                 });
             });
-            console.log.info('payments again', payments);
+            console.info('payments again', payments);
             return payments;
         });
     }
