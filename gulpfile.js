@@ -63,3 +63,9 @@ gulp.task('default', [
     'develop',
     'watch'
 ]);
+gulp.task('build', [
+    'controllers',
+    'services',
+    'sass',
+    'develop'
+]);

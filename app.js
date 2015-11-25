@@ -13,7 +13,7 @@ app.listen(config.port, function () {
 });
 
 function bootstrapIndex(keyOverride) {
-  let $redis = redis.createClient(),
+  var $redis = redis.createClient(),
     key = keyOverride || $redis.get('web:current');
   return $redis.get(key);
 }
