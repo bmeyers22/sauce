@@ -19,6 +19,6 @@ function bootstrapIndex(keyOverride) {
 }
 
 
-router.get('*', function (req, res, next) {
+app.get('*', function (req, res, next) {
     res.send(bootstrapIndex());
 });
