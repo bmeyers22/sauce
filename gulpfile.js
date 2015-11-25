@@ -36,7 +36,6 @@ gulp.task('services', function(done) {
 
 
 gulp.task('watch', function() {
-    gulp.watch('./public/css/*.scss', ['sass']);
     gulp.watch(paths.js, ['controllers', 'services']);
 });
 
