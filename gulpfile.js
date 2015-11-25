@@ -66,6 +66,5 @@ gulp.task('default', [
 gulp.task('build', [
     'controllers',
     'services',
-    'sass',
-    'develop'
+    'sass'
 ]);
