@@ -1,8 +1,9 @@
 const express = require('express'),
+    _ = require('lodash'),
     router = express.Router(),
     Firebase = require("firebase"),
     request = require('request'),
-    USE_DEV_PAYMENTS = false,
+    USE_DEV_PAYMENTS = true,
     config = require('../../config/config'),
     VenmoService = require('../services/VenmoService'),
     InvoicesService = require('../services/InvoicesService');
@@ -11,10 +12,10 @@ module.exports = function (app) {
     app.use('/', router);
 };
 
-var VenmoController = {
-
+let VenmoController = function() {};
+VenmoController.prototype = {
     /**
-    * `VenmoPaymentsController.pay()`
+    * `VenmoPaymentsController.link()`
     */
     link: function (req, res) {
         let ref = new Firebase(config.firebase.url),
@@ -43,25 +44,25 @@ var VenmoController = {
     */
     pay(req, res) {
         let self = this,
-        payments;
+            payments;
         return this.setCurrentUser(req.body.user)
-        .then( (user) => {
-            return self.getPayments(req, res, USE_DEV_PAYMENTS);
-        })
-        .then( (data) => {
-            payments = data;
-            console.info("ABOUT TO PAY", data);
-            let proms = data.map(function (p) {
-                return self.sendPayment(p.venmoParams);
+            .then( (user) => {
+                return self.getPayments(req, res, USE_DEV_PAYMENTS);
             })
-            return Promise.all(proms);
-        })
-        .then( (paymentResponses) => {
-            return res.json({
-                response: paymentResponses,
-                paymentsSent: payments
+            .then( (data) => {
+                payments = data;
+                console.info("ABOUT TO PAY", data);
+                let proms = data.map(function (p) {
+                    return self.sendPayment(p.venmoParams);
+                })
+                return Promise.all(proms);
+            })
+            .then( (paymentResponses) => {
+                return res.json({
+                    response: paymentResponses,
+                    paymentsSent: payments
+                });
             });
-        });
     },
 
     sendPayment: function (data) {
@@ -81,19 +82,19 @@ var VenmoController = {
 
     getPayments: function (req, res, dev) {
         console.info("payments", req.body.payment.invoices);
+        console.info("THIS", this);
         let paymentsProm = this.aggregateInvoices(req.body.payment.invoices, req.body),
-        venmoRef = new Firebase(`${config.firebase.url}venmoUsers`),
-        self = this,
-        payments;
-        return paymentsProm.then(function (data) {
+            venmoRef = new Firebase(`${config.firebase.url}venmoUsers`),
+            payments;
+        return paymentsProm.then( (data) => {
             console.info("data", data);
             payments = data;
-            let proms = data.map(function (p) {
-                return new Promise(function (resolve, reject) {
+            let proms = data.map( (p) => {
+                return new Promise( (resolve, reject) => {
                     venmoRef
                     .orderByKey()
                     .equalTo(p.user)
-                    .once('value', function (snapshot) {
+                    .once('value',  (snapshot) => {
                         if (snapshot.exists()) {
                             let obj = snapshot.val()[p.user];
                             obj.id = p.user;
@@ -102,7 +103,7 @@ var VenmoController = {
                             new Firebase(`${config.firebase.url}users`)
                             .orderByKey()
                             .equalTo(p.user)
-                            .once('value', function (snapshot) {
+                            .once('value',  (snapshot) => {
                                 let obj = snapshot.val()[p.user];
                                 obj.id = p.user;
                                 resolve(obj);
@@ -112,17 +113,18 @@ var VenmoController = {
 
                 })
             });
+            console.info("MADE IT HERE");
             return Promise.all(proms);
-        }).then(function (users) {
+        }).then( (users) => {
             console.info("USERS", users);
-            let mapped = payments.map(function (p, i) {
+            let mapped = payments.map( (p, i) => {
                 let venmoParams = {};
                 console.info("DEV", dev)
                 if (dev) {
-                    venmoParams = self.getDevPayment(self.currentUser);
+                    venmoParams = this.getDevPayment(this.currentUser);
                 } else {
                     venmoParams = {
-                        access_token: self.currentUser.access_token,
+                        access_token: this.currentUser.access_token,
                         user_id: users[i].user ? users[i].user.id : users[i].email,
                         amount: p.amount,
                         note: p.note || "Payment made through Settld"
@@ -158,30 +160,36 @@ var VenmoController = {
 
     aggregateInvoices: function(invoiceIds, params) {
         return InvoicesService.getInvoicesFromIds(invoiceIds)
-        .then( (invoices) => {
-            this.invoices = invoices;
-            let invoiceGroups = _.groupBy(this.invoices, 'payee');
-            console.info('invoicegroups', invoiceGroups);
-            let payments = [];
-            _.forIn(invoiceGroups, function (val, key) {
-                console.info('val', val);
-                console.info('key', key);
-                let amount = 0;
-                val.forEach(function (inv) {
-                    amount += inv.amount;
+            .then( (invoices) => {
+                console.info("Invoices", invoices);
+                this.invoices = invoices;
+                console.info("THIS", this);
+                let invoiceGroups = _.groupBy(this.invoices, 'payee');
+                console.info('invoicegroups', invoiceGroups);
+                let payments = [];
+                _.forIn(invoiceGroups, function (val, key) {
+                    console.info('val', val);
+                    console.info('key', key);
+                    let amount = 0;
+                    val.forEach(function (inv) {
+                        amount += inv.amount;
+                    });
+                    payments.push({
+                        invoices: val,
+                        user: key,
+                        amount: amount,
+                        note: params.note
+                    });
                 });
-                payments.push({
-                    invoices: val,
-                    user: key,
-                    amount: amount,
-                    note: params.note
-                });
-            });
-            console.info('payments again', payments);
-            return payments;
-        })
+                console.info('payments again', payments);
+                return payments;
+            })
     }
 };
 
-router.post('/venmo/link', VenmoController.link);
-router.post('/venmo/pay', VenmoController.pay);
+router.post('/venmo/link', function (req, res) {
+    new VenmoController().link(req, res);
+});
+router.post('/venmo/pay', function (req, res) {
+    new VenmoController().pay(req, res);
+});

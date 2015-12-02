@@ -7,17 +7,18 @@ var invoicesRef = new Firebase(config.firebase.url + 'invoices');
 
 module.exports = {
     getInvoicesFromIds: function getInvoicesFromIds(invoiceIds) {
+        console.info(invoiceIds);
         return Promise.all(invoiceIds.map(function (id) {
             return new Promise(function (resolve, reject) {
+                console.info("ID", id);
                 invoicesRef.orderByKey().equalTo(id).once('value', function (snapshot) {
                     var obj = snapshot.val()[id];
                     obj.id = id;
+                    console.info("OBJ", obj);
                     resolve(obj);
                 });
             });
-        })).then(function (invoices) {
-            return invoices;
-        });
+        }));
     },
     aggregateInvoicesByPayee: function aggregateInvoicesByPayee(invoices, params) {
         var invoiceGroups = _.groupBy(invoices, 'payee'),

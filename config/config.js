@@ -51,6 +51,9 @@ var config = {
             name: 'sauce'
         },
         port: process.env.PORT || 8080,
+        firebase: {
+            url: 'https://settld.firebaseIO.com/'
+        },
         venmo: {
             sandboxParams: {
                 userId: '145434160922624933',

@@ -1,10 +1,11 @@
 'use strict';
 
 var express = require('express'),
+    _ = require('lodash'),
     router = express.Router(),
     Firebase = require("firebase"),
     request = require('request'),
-    USE_DEV_PAYMENTS = false,
+    USE_DEV_PAYMENTS = true,
     config = require('../../config/config'),
     VenmoService = require('../services/VenmoService'),
     InvoicesService = require('../services/InvoicesService');
@@ -13,10 +14,10 @@ module.exports = function (app) {
     app.use('/', router);
 };
 
-var VenmoController = {
-
+var VenmoController = function VenmoController() {};
+VenmoController.prototype = {
     /**
-    * `VenmoPaymentsController.pay()`
+    * `VenmoPaymentsController.link()`
     */
     link: function link(req, res) {
         var ref = new Firebase(config.firebase.url),
@@ -79,10 +80,12 @@ var VenmoController = {
     },
 
     getPayments: function getPayments(req, res, dev) {
+        var _this2 = this;
+
         console.info("payments", req.body.payment.invoices);
+        console.info("THIS", this);
         var paymentsProm = this.aggregateInvoices(req.body.payment.invoices, req.body),
             venmoRef = new Firebase(config.firebase.url + 'venmoUsers'),
-            self = this,
             payments = undefined;
         return paymentsProm.then(function (data) {
             console.info("data", data);
@@ -104,6 +107,7 @@ var VenmoController = {
                     });
                 });
             });
+            console.info("MADE IT HERE");
             return Promise.all(proms);
         }).then(function (users) {
             console.info("USERS", users);
@@ -111,10 +115,10 @@ var VenmoController = {
                 var venmoParams = {};
                 console.info("DEV", dev);
                 if (dev) {
-                    venmoParams = self.getDevPayment(self.currentUser);
+                    venmoParams = _this2.getDevPayment(_this2.currentUser);
                 } else {
                     venmoParams = {
-                        access_token: self.currentUser.access_token,
+                        access_token: _this2.currentUser.access_token,
                         user_id: users[i].user ? users[i].user.id : users[i].email,
                         amount: p.amount,
                         note: p.note || "Payment made through Settld"
@@ -148,11 +152,13 @@ var VenmoController = {
     },
 
     aggregateInvoices: function aggregateInvoices(invoiceIds, params) {
-        var _this2 = this;
+        var _this3 = this;
 
         return InvoicesService.getInvoicesFromIds(invoiceIds).then(function (invoices) {
-            _this2.invoices = invoices;
-            var invoiceGroups = _.groupBy(_this2.invoices, 'payee');
+            console.info("Invoices", invoices);
+            _this3.invoices = invoices;
+            console.info("THIS", _this3);
+            var invoiceGroups = _.groupBy(_this3.invoices, 'payee');
             console.info('invoicegroups', invoiceGroups);
             var payments = [];
             _.forIn(invoiceGroups, function (val, key) {
@@ -175,5 +181,9 @@ var VenmoController = {
     }
 };
 
-router.post('/venmo/link', VenmoController.link);
-router.post('/venmo/pay', VenmoController.pay);
+router.post('/venmo/link', function (req, res) {
+    new VenmoController().link(req, res);
+});
+router.post('/venmo/pay', function (req, res) {
+    new VenmoController().pay(req, res);
+});

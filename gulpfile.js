@@ -8,14 +8,15 @@ sh = require('shelljs');
 
 var paths = {
     js: [
-        'src/services/**/*.js',
-        'src/controllers/**/*.js'
+        'src/**/*.js'
+    ],
+    views: [
+        'src/**/*.handlebars'
     ]
 }
 
 gulp.task('clean-app', function() {
-    sh.rm('-r', 'app/controllers');
-    sh.rm('-r', 'app/services');
+    sh.rm('-r', 'app/');
 });
 
 gulp.task('sass', function () {
@@ -24,31 +25,30 @@ gulp.task('sass', function () {
     .pipe(livereload());
 });
 
-gulp.task('controllers', function(done) {
-    return gulp.src(['src/controllers/**/*.js'])
-    .pipe(babel({
-            presets: ['es2015']
-        }))
-    .pipe(gulp.dest('app/controllers/'));
+gulp.task('views', function () {
+    return gulp.src(paths.views)
+    .pipe(gulp.dest('app/'));
 });
 
-gulp.task('services', function(done) {
-    return gulp.src(['src/services/**/*.js'])
+gulp.task('javascript', function(done) {
+    return gulp.src(paths.js)
     .pipe(babel({
             presets: ['es2015']
         }))
-    .pipe(gulp.dest('app/services/'));
+    .pipe(gulp.dest('app/'));
 });
 
 
 gulp.task('watch', function() {
-    gulp.watch(paths.js, ['controllers', 'services']);
+    gulp.watch(paths.js, ['javascript']);
 });
 
 gulp.task('develop', function () {
     livereload.listen();
     nodemon({
+        exec: 'node-inspector --web-port=3000 & node --debug',
         script: 'app.js',
+        debug: true,
         ext: 'js coffee handlebars',
         stdout: false
     }).on('readable', function () {
@@ -64,15 +64,15 @@ gulp.task('develop', function () {
 
 gulp.task('default', [
     'clean-app',
-    'controllers',
-    'services',
+    'javascript',
+    'views',
     'sass',
     'develop',
     'watch'
 ]);
 gulp.task('build', [
     'clean-app',
-    'controllers',
-    'services',
+    'javascript',
+    'views',
     'sass'
 ]);
