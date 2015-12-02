@@ -43,7 +43,7 @@ gulp.task('watch', function() {
     gulp.watch(paths.js, ['javascript']);
 });
 
-gulp.task('develop', function () {
+gulp.task('develop', ['javascript'], function () {
     livereload.listen();
     nodemon({
         exec: 'node-inspector --web-port=3000 & node --debug',
