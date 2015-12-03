@@ -50,7 +50,7 @@ var config = {
         app: {
             name: 'sauce'
         },
-        port: process.env.PORT || 8080,
+        port: process.env.PORT || 3000,
         firebase: {
             url: 'https://settld.firebaseIO.com/'
         },
