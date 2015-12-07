@@ -11,6 +11,7 @@ var paths = {
     ],
     views: [
         'src/**/*.handlebars'
+    ]
 }
 
 gulp.task('clean-app', function() {
