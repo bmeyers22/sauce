@@ -10,7 +10,7 @@ var config = {
         },
         port: 3000,
         firebase: {
-            url: 'https://incandescent-fire-2053.firebaseIO.com/'
+            url: 'https://settld-dev.firebaseIO.com/'
         },
         venmo: {
             sandboxParams: {
@@ -32,8 +32,8 @@ var config = {
             scope: 'access_email, access_phone, access_profile, make_payments',
             endpoint: 'https://api.venmo.com/v1/oauth/access_token',
             redirectUri: 'http://localhost:4200/login',
-            clientId: '2929',
-            clientSecret: 'SHTz2rnN5UeWFXm8DR6jUUb9E9BrqTJ3'
+            clientId: process.env.VENMO_APP_ID_SETTLD_TEST,
+            clientSecret: process.env.VENMO_APP_SETTLD_SECRET_TEST
         }
     },
 
@@ -74,8 +74,8 @@ var config = {
             scope: 'access_email, access_phone, access_profile, make_payments',
             endpoint: 'https://api.venmo.com/v1/oauth/access_token',
             redirectUri: 'http://localhost:4200/login',
-            clientId: '2929',
-            clientSecret: 'SHTz2rnN5UeWFXm8DR6jUUb9E9BrqTJ3'
+            clientId: process.env.VENMO_APP_ID_SETTLD,
+            clientSecret: process.env.VENMO_APP_SETTLD_SECRET
         }
 
     }
