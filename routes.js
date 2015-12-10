@@ -4,7 +4,7 @@ function bootstrapIndex(keyOverride, res) {
 
     var $redis = redis.createClient(),
         key = keyOverride;
-    $redis.auth(process.ENV.REDIS_PASSWORD);
+    $redis.auth(process.env.REDIS_PASSWORD);
     if (!key) {
         $redis.get('web:index:current', function (err, reply) {
             $redis.get('web:index:' + reply, function (err, reply) {
