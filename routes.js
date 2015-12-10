@@ -8,12 +8,20 @@ function bootstrapIndex(keyOverride, res) {
     if (!key) {
         $redis.get('web:index:current', function (err, reply) {
             $redis.get('web:index:' + reply, function (err, reply) {
-                return res.send(reply || "Hello");
+                if (reply) {
+                    return res.send(reply);
+                } else {
+                    return res.sendFile(__dirname + '/404.html');
+                }
             });
         })
     } else {
         $redis.get('web:index:' + key, function (err, reply) {
-            return res.send(reply || "hello");
+            if (reply) {
+                return res.send(reply);
+            } else {
+                return res.sendFile(__dirname + '/404.html');
+            }
         });
     }
 }
