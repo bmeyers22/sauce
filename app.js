@@ -1,4 +1,4 @@
-
+require('dotenv').load();
 
 var express = require('express'),
     rollbar = require('rollbar'),
